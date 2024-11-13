@@ -1,0 +1,15 @@
+spring:
+  profiles:
+    active: dev
+  application:
+    name: login-demo
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/qaqchat
+    username: ${qaqchat.datasource.username}
+    password: ${qaqchat.datasource.password}
+
+qaqchat:
+  jwt:
+    secret-key: ${qaqchat.jwt.secret-key}
+    expiration-time: 86400000
