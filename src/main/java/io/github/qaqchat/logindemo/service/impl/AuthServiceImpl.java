@@ -1,33 +1,34 @@
 package io.github.qaqchat.logindemo.service.impl;
 
-import io.github.qaqchat.logindemo.mapper.UserMapper;
-import io.github.qaqchat.logindemo.pojo.User;
-import io.github.qaqchat.logindemo.pojo.UserLoginDTO;
-import io.github.qaqchat.logindemo.pojo.UserTokenPayload;
-import io.github.qaqchat.logindemo.pojo.UserVO;
-import io.github.qaqchat.logindemo.service.UserService;
+import io.github.qaqchat.logindemo.mapper.AuthMapper;
+import io.github.qaqchat.logindemo.pojo.dto.UserLoginDTO;
+import io.github.qaqchat.logindemo.pojo.dto.UserRegisterDTO;
+import io.github.qaqchat.logindemo.pojo.entity.User;
+import io.github.qaqchat.logindemo.pojo.vo.UserTokenPayload;
+import io.github.qaqchat.logindemo.pojo.vo.UserVO;
+import io.github.qaqchat.logindemo.service.AuthService;
 import io.github.qaqchat.logindemo.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class AuthServiceImpl implements AuthService {
 
     @Autowired
-    private UserMapper userMapper;
+    private AuthMapper authMapper;
     @Autowired
     private JwtUtil jwtUtil;
 
     @Override
-    public UserTokenPayload loginWithUsernameOrEmail(UserLoginDTO userLoginDTO) {
+    public UserTokenPayload loginWithPassword(UserLoginDTO userLoginDTO) {
         String usernameOrEmail = userLoginDTO.getUsernameOrEmail();
         String password = userLoginDTO.getPassword();
 
         User user;
         if (usernameOrEmail.contains("@")) {
-            user = userMapper.getByEmail(usernameOrEmail);
+            user = authMapper.getByEmail(usernameOrEmail);
         } else  {
-            user = userMapper.getByUsername(usernameOrEmail);
+            user = authMapper.getByUsername(usernameOrEmail);
         }
 
         if (user == null) {
@@ -51,5 +52,20 @@ public class UserServiceImpl implements UserService {
         userTokenPayload.setPayload(userVO);
 
         return userTokenPayload;
+    }
+
+    @Override
+    public UserTokenPayload register(UserRegisterDTO userRegisterDTO) {
+        // 1. 查询用户名是否存在
+
+        // 2. 查询邮箱是否存在
+
+        // 3. 查询验证码是否合法
+
+        // 4. 补充用户其他字段，插入数据库
+
+        // 5. 返回VO
+
+        return null;
     }
 }

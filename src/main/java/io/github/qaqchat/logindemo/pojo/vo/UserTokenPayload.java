@@ -1,4 +1,4 @@
-package io.github.qaqchat.logindemo.pojo;
+package io.github.qaqchat.logindemo.pojo.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
