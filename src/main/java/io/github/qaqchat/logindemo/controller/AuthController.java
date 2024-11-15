@@ -4,7 +4,9 @@ import io.github.qaqchat.logindemo.pojo.dto.SendCodeDTO;
 import io.github.qaqchat.logindemo.pojo.dto.UserLoginDTO;
 import io.github.qaqchat.logindemo.pojo.dto.UserRegisterDTO;
 import io.github.qaqchat.logindemo.pojo.vo.Result;
-import io.github.qaqchat.logindemo.pojo.vo.UserTokenPayload;
+import io.github.qaqchat.logindemo.pojo.vo.SendCodeResponseVO;
+import io.github.qaqchat.logindemo.pojo.vo.UserLoginResponseVO;
+import io.github.qaqchat.logindemo.pojo.vo.UserRegisterResponseVO;
 import io.github.qaqchat.logindemo.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,12 +22,12 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/login/password")
-    public Result<UserTokenPayload> login(@RequestBody UserLoginDTO userLoginDTO) {
-        UserTokenPayload userTokenPayload = authService.loginWithPassword(userLoginDTO);
-        if (userTokenPayload == null) {
+    public Result<UserLoginResponseVO> login(@RequestBody UserLoginDTO userLoginDTO) {
+        UserLoginResponseVO userLoginResponseVO = authService.loginWithPassword(userLoginDTO);
+        if (userLoginResponseVO == null) {
             return Result.failure("not exits");
         }
-        return Result.success(userTokenPayload);
+        return Result.success(userLoginResponseVO);
     }
 
     @PostMapping("/login/wechat")
@@ -35,18 +37,18 @@ public class AuthController {
     }
 
     @PostMapping("register")
-    public Result<UserTokenPayload> register(@RequestBody UserRegisterDTO userRegisterDTO) {
-        UserTokenPayload userTokenPayload = authService.register(userRegisterDTO);
-        if (userTokenPayload == null) {
+    public Result<UserRegisterResponseVO> register(@RequestBody UserRegisterDTO userRegisterDTO) {
+        UserRegisterResponseVO userRegisterResponseVO= authService.register(userRegisterDTO);
+        if (userRegisterResponseVO == null) {
             return Result.failure("error");
         }
-        return Result.success(userTokenPayload);
+        return Result.success(userRegisterResponseVO);
     }
 
     @PostMapping("/send-code")
-    public Result<Object> sendCode(@RequestBody SendCodeDTO sendCodeDTO) {
-
-        return null;
+    public Result<SendCodeResponseVO> sendCode(@RequestBody SendCodeDTO sendCodeDTO) {
+        SendCodeResponseVO sendCodeResponseVO = authService.sendCode(sendCodeDTO);
+        return Result.success(sendCodeResponseVO);
     }
 
 }

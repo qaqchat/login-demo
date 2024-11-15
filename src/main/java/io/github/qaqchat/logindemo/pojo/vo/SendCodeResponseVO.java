@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserTokenPayload {
-    private String token;
-    private UserVO payload;
+public class SendCodeResponseVO {
+    private Boolean success;
 }
