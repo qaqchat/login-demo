@@ -23,3 +23,16 @@ qaqchat:
     port: ${qaqchat.email-sender.port}
     from: ${qaqchat.email-sender.from}
     password: ${qaqchat.email-sender.password}
+
+# springdoc-openapi项目配置
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: io.github.qaqchat.logindemo.controller
