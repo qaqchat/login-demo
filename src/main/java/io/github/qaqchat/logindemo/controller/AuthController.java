@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "权限")
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/auth")
 public class AuthController {
 
     @Autowired
@@ -36,7 +36,7 @@ public class AuthController {
 
     @Operation(summary = "微信登录")
     @PostMapping("/login/wechat")
-    public Result wechatLogin() {
+    public Result<Object> wechatLogin() {
         // TODO
         return Result.failure("not support wechat login");
     }
