@@ -19,6 +19,8 @@ public class UserVO {
     private String nickname;
     @Schema(description = "头像")
     private String avatar;
+    @Schema(description = "个性签名")
+    private String motto;
     @Schema(description = "注册时间")
     private LocalDateTime regTime;
 }
