@@ -53,7 +53,7 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT || 22 }}
           source: qaqchat-app.tar
-          target: ${{ secrets.DEPLOY_TARGET_DIR }}/qaqchat-app-${{ github.sha }}.tar
+          target: ${{ secrets.DEPLOY_TARGET_DIR }}/
 
   deploy:
     name: Deploy to Server
