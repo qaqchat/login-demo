@@ -46,7 +46,7 @@ jobs:
           chmod 644 qaqchat-app.tar
 
       - name: Upload to server
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@v0.1.6
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
@@ -54,7 +54,6 @@ jobs:
           port: ${{ secrets.PORT || 22 }}
           source: qaqchat-app.tar
           target: ${{ secrets.DEPLOY_TARGET_DIR }}/qaqchat-app-${{ github.sha }}.tar
-          debug: true
 
   deploy:
     name: Deploy to Server
