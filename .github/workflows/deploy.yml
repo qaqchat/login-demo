@@ -53,12 +53,13 @@ jobs:
           TARGET: ${{ secrets.DEPLOY_TARGET_DIR }}
         run: |
           mkdir -p ~/.ssh
+
           echo "${SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-          echo "StrictHostKeyChecking no" >> ~/.ssh/config
-
-          scp qaqchat-app.tar ${USERNAME}@${HOST}:${TARGET}/qaqchat-app-${{ github.sha }}.tar
+          ssh-keyscan ${HOST} >> ~/.ssh/known_hosts
+          
+          rsync -avz --progress qaqchat-app.tar ${USERNAME}@${HOST}:${TARGET}/qaqchat-app-${{ github.sha }}.tar
 
   deploy:
     name: Deploy to Server
