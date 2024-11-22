@@ -1,0 +1,89 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build and Upload
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+          cache-dependency-path: 'pom.xml'
+
+      - name: Build with Maven
+        run: mvn clean package --no-transfer-progress
+
+      - name: Check JAR file
+        run: |
+          if [ ! -f target/*.jar ]; then
+            echo "JAR file not found in target/ directory!"
+            exit 1
+          fi
+
+      - name: Build Docker image
+        run: |
+          docker build -t qaqchat-app:${{ github.sha }} .
+          docker tag qaqchat-app:${{ github.sha }} qaqchat-app:latest
+
+      - name: Save Docker image as tar
+        run: |
+          docker save -o qaqchat-app.tar qaqchat-app:latest
+
+      - name: Upload to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT || 22 }}
+          source: qaqchat-app.tar
+          target: ${{ secrets.DEPLOY_TARGET_DIR }}/qaqchat-app-${{ github.sha }}.tar
+
+  deploy:
+    name: Deploy to Server
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT || 22 }}
+          script: |
+            docker load < ${{ secrets.DEPLOY_TARGET_DIR }}/qaqchat-app-${{ github.sha }}.tar
+            docker stop qaqchat-app || true && docker rm qaqchat-app || true
+            docker run -d \
+              -e SPRING_PROFILES_ACTIVE=prod \
+              -e DB_URL=${{ secrets.DB_URL }} \
+              -e DB_USER=${{ secrets.DB_USER }} \
+              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              -e REDIS_HOST=${{ secrets.REDIS_HOST }} \
+              -e REDIS_PORT=${{ secrets.REDIS_PORT }}
+              -e REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }} \
+              -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
+              -e JWT_EXPIRATION_TIME=${{ secrets.JWT_EXPIRATION_TIME }} \
+              -e EMAIL_HOST=${{ secrets.EMAIL_HOST }} \
+              -e EMAIL_PORT=${{ secrets.EMAIL_PORT }} \
+              -e EMAIL_FROM=${{ secrets.EMAIL_FROM }} \
+              -e EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }} \
+              -p 8080:8080 \
+              --name qaqchat-app \
+              qaqchat-app:latest

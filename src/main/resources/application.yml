@@ -5,7 +5,7 @@ spring:
     name: login-demo
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/qaqchat
+    url: ${qaqchat.datasource.url}
     username: ${qaqchat.datasource.username}
     password: ${qaqchat.datasource.password}
   data:
@@ -17,7 +17,7 @@ spring:
 qaqchat:
   jwt:
     secret-key: ${qaqchat.jwt.secret-key}
-    expiration-time: 86400000
+    expiration-time: ${qaqchat.jwt.expiration-time}
   email-sender:
     host: ${qaqchat.email-sender.host}
     port: ${qaqchat.email-sender.port}
