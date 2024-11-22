@@ -26,7 +26,7 @@ jobs:
           cache-dependency-path: 'pom.xml'
 
       - name: Build with Maven
-        run: mvn clean package --no-transfer-progress
+        run: mvn clean package --no-transfer-progress -DskipTests
 
       - name: Check JAR file
         run: |
@@ -46,14 +46,19 @@ jobs:
           chmod 644 qaqchat-app.tar
 
       - name: Upload to server
-        uses: appleboy/scp-action@v0.1.6
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
-          port: ${{ secrets.PORT || 22 }}
-          source: qaqchat-app.tar
-          target: ${{ secrets.DEPLOY_TARGET_DIR }}/qaqchat-app-${{ github.sha }}.tar
+        env:
+          HOST: ${{ secrets.HOST }}
+          USERNAME: ${{ secrets.USERNAME }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          TARGET: ${{ secrets.DEPLOY_TARGET_DIR }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "${SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          echo "StrictHostKeyChecking no" >> ~/.ssh/config
+
+          scp qaqchat-app.tar ${USERNAME}@${HOST}:${TARGET}/qaqchat-app-${{ github.sha }}.tar
 
   deploy:
     name: Deploy to Server
@@ -66,7 +71,7 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.PORT || 22 }}
           script: |
             docker load < ${{ secrets.DEPLOY_TARGET_DIR }}/qaqchat-app-${{ github.sha }}.tar
