@@ -43,6 +43,7 @@ jobs:
       - name: Save Docker image as tar
         run: |
           docker save -o qaqchat-app.tar qaqchat-app:latest
+          chmod 644 qaqchat-app.tar
 
       - name: Upload to server
         uses: appleboy/scp-action@v0.1.7
