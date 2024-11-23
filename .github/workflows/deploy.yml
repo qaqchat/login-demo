@@ -34,17 +34,6 @@ jobs:
             echo "JAR file not found in target/ directory!"
             exit 1
           fi
-
-      - name: Build Docker image
-        run: |
-          docker build -t qaqchat-app:${{ github.sha }} .
-          docker tag qaqchat-app:${{ github.sha }} qaqchat-app:latest
-
-      - name: Save Docker image as tar
-        run: |
-          docker save -o qaqchat-app.tar qaqchat-app:latest
-          chmod 644 qaqchat-app.tar
-
       - name: Upload to server
         env:
           HOST: ${{ secrets.HOST }}
@@ -59,7 +48,33 @@ jobs:
 
           ssh-keyscan ${HOST} >> ~/.ssh/known_hosts
           
-          rsync -avz --progress qaqchat-app.tar ${USERNAME}@${HOST}:${TARGET}/qaqchat-app-${{ github.sha }}.tar
+          rsync -avz --progress ./target/*.jar ${USERNAME}@${HOST}:${TARGET}/qaqchat-app-${{ github.sha }}/
+          
+      # - name: Build Docker image
+      #   run: |
+      #     docker build -t qaqchat-app:${{ github.sha }} .
+      #     docker tag qaqchat-app:${{ github.sha }} qaqchat-app:latest
+
+      # - name: Save Docker image as tar
+      #   run: |
+      #     docker save -o qaqchat-app.tar qaqchat-app:latest
+      #     chmod 644 qaqchat-app.tar
+
+      # - name: Upload to server
+      #   env:
+      #     HOST: ${{ secrets.HOST }}
+      #     USERNAME: ${{ secrets.USERNAME }}
+      #     SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     TARGET: ${{ secrets.DEPLOY_TARGET_DIR }}
+      #   run: |
+      #     mkdir -p ~/.ssh
+
+      #     echo "${SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa
+      #     chmod 600 ~/.ssh/id_rsa
+
+      #     ssh-keyscan ${HOST} >> ~/.ssh/known_hosts
+          
+      #     rsync -avz --progress qaqchat-app.tar ${USERNAME}@${HOST}:${TARGET}/qaqchat-app-${{ github.sha }}.tar
 
   deploy:
     name: Deploy to Server
