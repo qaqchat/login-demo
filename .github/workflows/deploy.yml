@@ -51,4 +51,4 @@ jobs:
           rsync -avz --progress ./target/*.jar ${USERNAME}@${HOST}:${TARGET}/build/
           rsync -avz Dockerfile ${USERNAME}@${HOST}:${TARGET}/build/
 
-          ssh ${USERNAME}@${HOST}:${TARGET}/deploy.sh
+          ssh ${USERNAME}@${HOST} bash {TARGET}/deploy.sh
