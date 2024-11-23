@@ -34,7 +34,7 @@ jobs:
             echo "JAR file not found in target/ directory!"
             exit 1
           fi
-      - name: Upload to server
+      - name: Upload and Deploy
         env:
           HOST: ${{ secrets.HOST }}
           USERNAME: ${{ secrets.USERNAME }}
@@ -48,64 +48,7 @@ jobs:
 
           ssh-keyscan ${HOST} >> ~/.ssh/known_hosts
           
-          rsync -avz --progress ./target/*.jar ${USERNAME}@${HOST}:${TARGET}/qaqchat-app-${{ github.sha }}/
-          
-      # - name: Build Docker image
-      #   run: |
-      #     docker build -t qaqchat-app:${{ github.sha }} .
-      #     docker tag qaqchat-app:${{ github.sha }} qaqchat-app:latest
+          rsync -avz --progress ./target/*.jar ${USERNAME}@${HOST}:${TARGET}/build/
+          rsync -avz Dockerfile ${USERNAME}@${HOST}:${TARGET}/build/
 
-      # - name: Save Docker image as tar
-      #   run: |
-      #     docker save -o qaqchat-app.tar qaqchat-app:latest
-      #     chmod 644 qaqchat-app.tar
-
-      # - name: Upload to server
-      #   env:
-      #     HOST: ${{ secrets.HOST }}
-      #     USERNAME: ${{ secrets.USERNAME }}
-      #     SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      #     TARGET: ${{ secrets.DEPLOY_TARGET_DIR }}
-      #   run: |
-      #     mkdir -p ~/.ssh
-
-      #     echo "${SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa
-      #     chmod 600 ~/.ssh/id_rsa
-
-      #     ssh-keyscan ${HOST} >> ~/.ssh/known_hosts
-          
-      #     rsync -avz --progress qaqchat-app.tar ${USERNAME}@${HOST}:${TARGET}/qaqchat-app-${{ github.sha }}.tar
-
-  deploy:
-    name: Deploy to Server
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Deploy to server
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.PORT || 22 }}
-          script: |
-            docker load < ${{ secrets.DEPLOY_TARGET_DIR }}/qaqchat-app-${{ github.sha }}.tar
-            docker stop qaqchat-app || true && docker rm qaqchat-app || true
-            docker run -d \
-              -e SPRING_PROFILES_ACTIVE=prod \
-              -e DB_URL=${{ secrets.DB_URL }} \
-              -e DB_USER=${{ secrets.DB_USER }} \
-              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              -e REDIS_HOST=${{ secrets.REDIS_HOST }} \
-              -e REDIS_PORT=${{ secrets.REDIS_PORT }}
-              -e REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }} \
-              -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
-              -e JWT_EXPIRATION_TIME=${{ secrets.JWT_EXPIRATION_TIME }} \
-              -e EMAIL_HOST=${{ secrets.EMAIL_HOST }} \
-              -e EMAIL_PORT=${{ secrets.EMAIL_PORT }} \
-              -e EMAIL_FROM=${{ secrets.EMAIL_FROM }} \
-              -e EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }} \
-              -p 8080:8080 \
-              --name qaqchat-app \
-              qaqchat-app:latest
+          ssh ${USERNAME}@${HOST}:${TARGET}/deploy.sh
